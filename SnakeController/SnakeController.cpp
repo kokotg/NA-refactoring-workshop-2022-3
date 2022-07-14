@@ -63,11 +63,11 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
     }
 }
 
-bool Pause = false;
+bool RunSnake = true;
 
 void Controller::handleTimePassed(const TimeoutInd&)
 {
-    if (Pause)
+    if (RunSnake)
     {
         Segment newHead = getNewHead();
 
@@ -160,12 +160,12 @@ void Controller::handleNewFood(const FoodResp& requestedFood)
 
 void Controller::handlePause(const PauseInd& requestedPause)
 {
-    if (Pause)
+    if (RunSnake)
     {
-        Pause = false;
+        RunSnake = false;
     }
     else
-        Pause = true;
+        RunSnake = true;
 
 }
 
