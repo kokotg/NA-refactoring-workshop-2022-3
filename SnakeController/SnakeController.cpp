@@ -102,7 +102,8 @@ void Controller::handleDirectionChange(const DirectionInd& directionInd)
     auto direction = directionInd.direction;
 
     if ((m_currentDirection & 0b01) != (direction & 0b01)) {
-        m_currentDirection = direction;
+        if(!PauseFeatureEnabled)
+            m_currentDirection = direction;
     }
 }
 
@@ -148,6 +149,13 @@ void Controller::handleNewFood(const FoodResp& requestedFood)
     }
 
     m_foodPosition = std::make_pair(requestedFood.x, requestedFood.y);
+}
+
+void Controller::handlePauseInd(const PauseInd& requestedPause)
+{
+    if(PauseFeatureEnabled) PauseFeatureEnabled = false;
+    else PauseFeatureEnabled = true;
+
 }
 
 bool Controller::doesCollideWithSnake(const Controller::Segment &newSegment) const
@@ -221,6 +229,7 @@ void Controller::receive(std::unique_ptr<Event> e)
         case DirectionInd::MESSAGE_ID: return handleDirectionChange(*static_cast<EventT<DirectionInd> const&>(*e));
         case FoodInd::MESSAGE_ID: return handleFoodPositionChange(*static_cast<EventT<FoodInd> const&>(*e));
         case FoodResp::MESSAGE_ID: return handleNewFood(*static_cast<EventT<FoodResp> const&>(*e));
+        case PauseInd::MESSAGE_ID: return handlePauseInd(*static_cast<EventT<PauseInd> const&>(*e));
         default: throw UnexpectedEventException();
     };
 }
