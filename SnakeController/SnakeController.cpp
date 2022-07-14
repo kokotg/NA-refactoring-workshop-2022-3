@@ -8,6 +8,7 @@
 
 namespace Snake
 {
+
 ConfigurationError::ConfigurationError()
     : std::logic_error("Bad configuration of Snake::Controller.")
 {}
@@ -127,6 +128,11 @@ void Controller::handleFoodPositionChange(const FoodInd& receivedFood)
     m_foodPosition = std::make_pair(receivedFood.x, receivedFood.y);
 }
 
+void Controller::handlePause(const PauseInd&)
+{
+    PauseStatus = !PauseStatus;
+}
+
 void Controller::handleNewFood(const FoodResp& requestedFood)
 {
     bool requestedFoodCollidedWithSnake = false;
@@ -162,6 +168,7 @@ bool Controller::doesCollideWithSnake(const Controller::Segment &newSegment) con
 
 bool Controller::doesCollideWithWall(const Controller::Segment &newSegment) const
 {
+
     return newSegment.x < 0 or newSegment.y < 0 or
            newSegment.x >= m_mapDimension.first or
            newSegment.y >= m_mapDimension.second;
@@ -191,6 +198,7 @@ void Controller::repaintTile(unsigned int x, unsigned int y, Cell type)
     m_displayPort.send(std::make_unique<EventT<DisplayInd>>(indication));
 }
 
+
 void Controller::cleanNotExistingSnakeSegments()
 {
     m_segments.erase(
@@ -215,14 +223,25 @@ Controller::Segment Controller::getNewHead() const
 
 void Controller::receive(std::unique_ptr<Event> e)
 {
-    switch(e->getMessageId())
-    {
-        case TimeoutInd::MESSAGE_ID: return handleTimePassed(*static_cast<EventT<TimeoutInd> const&>(*e));
-        case DirectionInd::MESSAGE_ID: return handleDirectionChange(*static_cast<EventT<DirectionInd> const&>(*e));
-        case FoodInd::MESSAGE_ID: return handleFoodPositionChange(*static_cast<EventT<FoodInd> const&>(*e));
-        case FoodResp::MESSAGE_ID: return handleNewFood(*static_cast<EventT<FoodResp> const&>(*e));
-        default: throw UnexpectedEventException();
-    };
+
+            switch(e->getMessageId())
+            {
+                case PauseInd::MESSAGE_ID: 
+                    return handlePause(*static_cast<EventT<PauseInd> const&>(*e));
+                case TimeoutInd::MESSAGE_ID: 
+                    return handleTimePassed(*static_cast<EventT<TimeoutInd> const&>(*e));
+                case DirectionInd::MESSAGE_ID: 
+                    if(!PauseStatus)
+                        return handleDirectionChange(*static_cast<EventT<DirectionInd> const&>(*e));
+                    return;
+                case FoodInd::MESSAGE_ID: 
+                    return handleFoodPositionChange(*static_cast<EventT<FoodInd> const&>(*e));
+                case FoodResp::MESSAGE_ID: 
+                    return handleNewFood(*static_cast<EventT<FoodResp> const&>(*e));
+                default: throw UnexpectedEventException();
+            };
+
+    
 }
 
 } // namespace Snake
