@@ -6,8 +6,13 @@
 #include "EventT.hpp"
 #include "IPort.hpp"
 
+  
+
+
 namespace Snake
 {
+  
+    
 ConfigurationError::ConfigurationError()
     : std::logic_error("Bad configuration of Snake::Controller.")
 {}
@@ -65,6 +70,11 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
 
 void Controller::handleTimePassed(const TimeoutInd&)
 {
+    if (!Paused)
+      
+    {
+
+
     Segment newHead = getNewHead();
 
     if(doesCollideWithSnake(newHead))
@@ -97,12 +107,21 @@ void Controller::handleTimePassed(const TimeoutInd&)
     cleanNotExistingSnakeSegments();
 }
 
+}
+
 void Controller::handleDirectionChange(const DirectionInd& directionInd)
 {
+    if (!Paused)
+
+     {
+
+
     auto direction = directionInd.direction;
 
     if ((m_currentDirection & 0b01) != (direction & 0b01)) {
         m_currentDirection = direction;
+    }
+
     }
 }
 
@@ -150,27 +169,9 @@ void Controller::handleNewFood(const FoodResp& requestedFood)
     m_foodPosition = std::make_pair(requestedFood.x, requestedFood.y);
 }
 
-void Controller::handlePauseEvent(const PauseInd& PauseVar)
+void Controller::handlePauseEvent(const PauseInd&)
 {
-    
-    EventT<PauseInd> pauseEvent;
-
-    if (pauseEvent)
-        PauseInd = 0;
-    else
-        PauseInd = 1
-
-
- // auto time = PauseInd.MESSAGE_ID;
-
-
-
-
-
-
-
-
-
+      Paused = !Paused; 
 }   
 
 
@@ -242,11 +243,11 @@ void Controller::receive(std::unique_ptr<Event> e)
 {
     switch(e->getMessageId())
     {
+        case PauseInd::MESSAGE_ID: return  handlePauseEvent(*static_cast<EventT<PauseInd> const&>(*e));
         case TimeoutInd::MESSAGE_ID: return handleTimePassed(*static_cast<EventT<TimeoutInd> const&>(*e));
         case DirectionInd::MESSAGE_ID: return handleDirectionChange(*static_cast<EventT<DirectionInd> const&>(*e));
         case FoodInd::MESSAGE_ID: return handleFoodPositionChange(*static_cast<EventT<FoodInd> const&>(*e));
         case FoodResp::MESSAGE_ID: return handleNewFood(*static_cast<EventT<FoodResp> const&>(*e));
-        case PauseInd::MESSAGE_ID: return  handlePauseEvent(*static_cast<EventT<PauseInd> const&>(*e));
         default: throw UnexpectedEventException();
     };
 
