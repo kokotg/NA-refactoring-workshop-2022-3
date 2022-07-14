@@ -10,11 +10,11 @@ class EventT : public Event
     static_assert(std::is_copy_constructible<T>::value, "Payload type must be copy-construcible!");
 public:
     EventT(T const& payload = T())
-        : m_payload(std::make_unique<T>(payload))
+        : m_payload(std::make_unique<T>(payload)), PouseON(false)
     {}
 
     EventT(T&& payload)
-        : m_payload(std::make_unique<T>(std::forward<T>(payload)))
+        : m_payload(std::make_unique<T>(std::forward<T>(payload))) , PouseON(false)
     {}
 
     EventT(EventT&&) = default;
@@ -33,6 +33,7 @@ public:
 
 private:
     std::unique_ptr<T> m_payload;
+    bool PouseON;
 };
 
 template <class T>
