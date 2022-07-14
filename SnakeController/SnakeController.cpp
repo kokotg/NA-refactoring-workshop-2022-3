@@ -105,15 +105,20 @@ void Controller::handleTimePassed(const TimeoutInd&)
 
 void Controller::handleDirectionChange(const DirectionInd& directionInd)
 {
+if (RunSnake)
+    {
     auto direction = directionInd.direction;
 
     if ((m_currentDirection & 0b01) != (direction & 0b01)) {
         m_currentDirection = direction;
     }
+    }
 }
 
 void Controller::handleFoodPositionChange(const FoodInd& receivedFood)
 {
+    // if (RunSnake)
+    // {
     bool requestedFoodCollidedWithSnake = false;
     for (auto const& segment : m_segments) {
         if (segment.x == receivedFood.x and segment.y == receivedFood.y) {
@@ -131,10 +136,13 @@ void Controller::handleFoodPositionChange(const FoodInd& receivedFood)
     }
 
     m_foodPosition = std::make_pair(receivedFood.x, receivedFood.y);
+    // }
 }
 
 void Controller::handleNewFood(const FoodResp& requestedFood)
 {
+    if (RunSnake)
+    {
     bool requestedFoodCollidedWithSnake = false;
     for (auto const& segment : m_segments) {
         if (segment.x == requestedFood.x and segment.y == requestedFood.y) {
@@ -154,6 +162,7 @@ void Controller::handleNewFood(const FoodResp& requestedFood)
     }
 
     m_foodPosition = std::make_pair(requestedFood.x, requestedFood.y);
+    }
 }
 
 
