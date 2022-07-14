@@ -12,60 +12,63 @@ class IPort;
 
 namespace Snake
 {
-struct ConfigurationError : std::logic_error
-{
-    ConfigurationError();
-};
-
-struct UnexpectedEventException : std::runtime_error
-{
-    UnexpectedEventException();
-};
-
-class Controller : public IEventHandler
-{
-public:
-    Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePort, std::string const& p_config);
-
-    Controller(Controller const& p_rhs) = delete;
-    Controller& operator=(Controller const& p_rhs) = delete;
-
-    void receive(std::unique_ptr<Event> e) override;
-
-private:
-    void handleTimePassed(const TimeoutInd&);
-    void handleDirectionChange(const DirectionInd&);
-    void handleFoodPositionChange(const FoodInd& receivedFood);
-    void handleNewFood(const FoodResp& requestedFood);
-
-    struct Segment
+    struct ConfigurationError : std::logic_error
     {
-        int x;
-        int y;
-        int ttl;
+        ConfigurationError();
     };
 
-    Segment getNewHead() const;
-    bool doesCollideWithSnake(const Segment& newSegment) const;
-    bool doesCollideWithWall(const Segment& newSegment) const;
-    bool doesCollideWithFood(const Segment& newSegment) const;
+    struct UnexpectedEventException : std::runtime_error
+    {
+        UnexpectedEventException();
+    };
 
-    void notifyAboutFailure();
-    void repaintTile(const Segment& position, Cell type);
-    void repaintTile(unsigned int x, unsigned int y, Cell type);
+    class Controller : public IEventHandler
+    {
+    public:
+        Controller(IPort &p_displayPort, IPort &p_foodPort, IPort &p_scorePort, std::string const &p_config);
 
-    void cleanNotExistingSnakeSegments();
+        Controller(Controller const &p_rhs) = delete;
+        Controller &operator=(Controller const &p_rhs) = delete;
 
+        void receive(std::unique_ptr<Event> e) override;
 
-    IPort& m_displayPort;
-    IPort& m_foodPort;
-    IPort& m_scorePort;
+    private:
+        void handleTimePassed(const TimeoutInd &);
+        void handleDirectionChange(const DirectionInd &);
+        void handleFoodPositionChange(const FoodInd &receivedFood);
+        void handleNewFood(const FoodResp &requestedFood);
+        void handlePauseEvent(const PauseInd &);
 
-    std::pair<int, int> m_mapDimension;
-    std::pair<int, int> m_foodPosition;
+        struct Segment
+        {
+            int x;
+            int y;
+            int ttl;
+        };
 
-    Direction m_currentDirection;
-    std::list<Segment> m_segments;
-};
+        Segment getNewHead() const;
+        bool doesCollideWithSnake(const Segment &newSegment) const;
+        bool doesCollideWithWall(const Segment &newSegment) const;
+        bool doesCollideWithFood(const Segment &newSegment) const;
+
+        void notifyAboutFailure();
+        void repaintTile(const Segment &position, Cell type);
+        void repaintTile(unsigned int x, unsigned int y, Cell type);
+
+        void cleanNotExistingSnakeSegments();
+
+        IPort &m_displayPort;
+        IPort &m_foodPort;
+        IPort &m_scorePort;
+
+        std::pair<int, int> m_mapDimension;
+        std::pair<int, int> m_foodPosition;
+
+        Direction m_currentDirection;
+        std::list<Segment> m_segments;
+
+        bool Paused =  false;
+
+    };
 
 } // namespace Snake
