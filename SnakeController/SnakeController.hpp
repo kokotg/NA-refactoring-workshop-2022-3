@@ -67,6 +67,7 @@ private:
 
     Direction m_currentDirection;
     std::list<Segment> m_segments;
+    bool pauseEnable;
 };
 
 } // namespace Snake
