@@ -229,7 +229,9 @@ void Controller::receive(std::unique_ptr<Event> e)
                 case PauseInd::MESSAGE_ID: 
                     return handlePause(*static_cast<EventT<PauseInd> const&>(*e));
                 case TimeoutInd::MESSAGE_ID: 
-                    return handleTimePassed(*static_cast<EventT<TimeoutInd> const&>(*e));
+                    if(!PauseStatus)
+                        return handleTimePassed(*static_cast<EventT<TimeoutInd> const&>(*e));
+                    return;
                 case DirectionInd::MESSAGE_ID: 
                     if(!PauseStatus)
                         return handleDirectionChange(*static_cast<EventT<DirectionInd> const&>(*e));
