@@ -6,6 +6,8 @@
 #include "EventT.hpp"
 #include "IPort.hpp"
 
+
+
 namespace Snake
 {
 ConfigurationError::ConfigurationError()
@@ -65,6 +67,8 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
 
 void Controller::handleTimePassed(const TimeoutInd&)
 {
+    if(!paused)
+    {
     Segment newHead = getNewHead();
 
     if(doesCollideWithSnake(newHead))
@@ -95,14 +99,17 @@ void Controller::handleTimePassed(const TimeoutInd&)
     repaintTile(newHead, Cell_SNAKE);
 
     cleanNotExistingSnakeSegments();
+    }
 }
 
 void Controller::handleDirectionChange(const DirectionInd& directionInd)
 {
+    if(!paused){
     auto direction = directionInd.direction;
 
     if ((m_currentDirection & 0b01) != (direction & 0b01)) {
         m_currentDirection = direction;
+    }
     }
 }
 
@@ -150,6 +157,20 @@ void Controller::handleNewFood(const FoodResp& requestedFood)
     m_foodPosition = std::make_pair(requestedFood.x, requestedFood.y);
 }
 
+void Controller::handlePauseState(const PauseInd&)
+{
+    (paused == false) ? (paused = true) : (paused = false);
+    /*
+    if(!paused)
+    {
+        paused = true;
+    }
+    else
+    {
+        paused = false;
+    }
+    */
+}
 bool Controller::doesCollideWithSnake(const Controller::Segment &newSegment) const
 {
     for (auto segment : m_segments) {
@@ -221,6 +242,7 @@ void Controller::receive(std::unique_ptr<Event> e)
         case DirectionInd::MESSAGE_ID: return handleDirectionChange(*static_cast<EventT<DirectionInd> const&>(*e));
         case FoodInd::MESSAGE_ID: return handleFoodPositionChange(*static_cast<EventT<FoodInd> const&>(*e));
         case FoodResp::MESSAGE_ID: return handleNewFood(*static_cast<EventT<FoodResp> const&>(*e));
+        case PauseInd::MESSAGE_ID: return handlePauseState(*static_cast<EventT<PauseInd> const&>(*e));
         default: throw UnexpectedEventException();
     };
 }
