@@ -37,13 +37,14 @@ private:
     void handleDirectionChange(const DirectionInd&);
     void handleFoodPositionChange(const FoodInd& receivedFood);
     void handleNewFood(const FoodResp& requestedFood);
-
+    void handlePauseI(const PauseInd& pause);
     struct Segment
     {
         int x;
         int y;
         int ttl;
     };
+    bool bGamePause = false;
 
     Segment getNewHead() const;
     bool doesCollideWithSnake(const Segment& newSegment) const;
