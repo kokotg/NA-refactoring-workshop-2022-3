@@ -63,38 +63,44 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
     }
 }
 
+bool Pause = false;
+
 void Controller::handleTimePassed(const TimeoutInd&)
 {
-    Segment newHead = getNewHead();
+    if (Pause)
+    {
+        Segment newHead = getNewHead();
 
-    if(doesCollideWithSnake(newHead))
-    {
-        notifyAboutFailure();
-        return;
-    }
-    if(doesCollideWithFood(newHead))
-    {
-        m_scorePort.send(std::make_unique<EventT<ScoreInd>>());
-        m_foodPort.send(std::make_unique<EventT<FoodReq>>());
-    }
-    else if (doesCollideWithWall(newHead))
-    {
-        notifyAboutFailure();
-        return;
-    }
-    else
-    {
-        for (auto &segment : m_segments) {
-            if (not --segment.ttl) {
-                repaintTile(segment, Cell_FREE);
+        if(doesCollideWithSnake(newHead))
+        {
+            notifyAboutFailure();
+            return;
+        }
+        if(doesCollideWithFood(newHead))
+        {
+            m_scorePort.send(std::make_unique<EventT<ScoreInd>>());
+            m_foodPort.send(std::make_unique<EventT<FoodReq>>());
+        }
+        else if (doesCollideWithWall(newHead))
+        {
+            notifyAboutFailure();
+            return;
+        }
+        else
+        {
+            for (auto &segment : m_segments) {
+                if (not --segment.ttl) {
+                    repaintTile(segment, Cell_FREE);
+                }
             }
         }
+
+        m_segments.push_front(newHead);
+        repaintTile(newHead, Cell_SNAKE);
+
+        cleanNotExistingSnakeSegments();
     }
-
-    m_segments.push_front(newHead);
-    repaintTile(newHead, Cell_SNAKE);
-
-    cleanNotExistingSnakeSegments();
+    
 }
 
 void Controller::handleDirectionChange(const DirectionInd& directionInd)
@@ -150,8 +156,16 @@ void Controller::handleNewFood(const FoodResp& requestedFood)
     m_foodPosition = std::make_pair(requestedFood.x, requestedFood.y);
 }
 
+
+
 void Controller::handlePause(const PauseInd& requestedPause)
 {
+    if (Pause)
+    {
+        Pause = false;
+    }
+    else
+        Pause = true;
 
 }
 
