@@ -75,6 +75,7 @@ struct LooseInd
 
 struct PauseInd
 {
+    bool isPauseOn = 0;
     static constexpr std::uint32_t MESSAGE_ID = 0x91;
 };
 
