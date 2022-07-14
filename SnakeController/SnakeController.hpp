@@ -33,10 +33,12 @@ public:
     void receive(std::unique_ptr<Event> e) override;
 
 private:
+
     void handleTimePassed(const TimeoutInd&);
     void handleDirectionChange(const DirectionInd&);
     void handleFoodPositionChange(const FoodInd& receivedFood);
     void handleNewFood(const FoodResp& requestedFood);
+    void handlePause(const PauseInd& requestedPause);
 
     struct Segment
     {
@@ -66,6 +68,8 @@ private:
 
     Direction m_currentDirection;
     std::list<Segment> m_segments;
+
+    bool paused = false;
 };
 
 } // namespace Snake
