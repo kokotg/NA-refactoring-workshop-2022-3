@@ -37,6 +37,7 @@ private:
     void handleDirectionChange(const DirectionInd&);
     void handleFoodPositionChange(const FoodInd& receivedFood);
     void handleNewFood(const FoodResp& requestedFood);
+    void handlePauseInd(const PauseInd&);
 
     struct Segment
     {
@@ -49,6 +50,8 @@ private:
     bool doesCollideWithSnake(const Segment& newSegment) const;
     bool doesCollideWithWall(const Segment& newSegment) const;
     bool doesCollideWithFood(const Segment& newSegment) const;
+
+    bool isPaused;
 
     void notifyAboutFailure();
     void repaintTile(const Segment& position, Cell type);
