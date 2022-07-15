@@ -65,6 +65,10 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
 
 void Controller::handleTimePassed(const TimeoutInd&)
 {
+    if (paused)
+    return;
+    else
+    {
     Segment newHead = getNewHead();
 
     if(doesCollideWithSnake(newHead))
@@ -95,14 +99,19 @@ void Controller::handleTimePassed(const TimeoutInd&)
     repaintTile(newHead, Cell_SNAKE);
 
     cleanNotExistingSnakeSegments();
+    }
 }
 
 void Controller::handleDirectionChange(const DirectionInd& directionInd)
 {
+    if (paused)
+    return;
+    else{
     auto direction = directionInd.direction;
 
     if ((m_currentDirection & 0b01) != (direction & 0b01)) {
         m_currentDirection = direction;
+    }
     }
 }
 
@@ -152,8 +161,14 @@ void Controller::handleNewFood(const FoodResp& requestedFood)
 
 void Controller::handlePauseEvent(const PauseInd&)
 {
-
+    IfPaused();
 }
+
+void Controller::IfPaused()
+{
+    paused = !paused;
+}
+
 
 bool Controller::doesCollideWithSnake(const Controller::Segment &newSegment) const
 {
